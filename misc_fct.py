@@ -65,10 +65,25 @@ def file_checks(inputed_file, extension='csv'):
             extension, splited_file[-1]))
 
 
+def user_input(filename):
+    """ Queries the user to replace file or not if it exists.
+
+    Arguments:
+    filename -- str, path to the file.
+    Returns:
+
+    """
+    if os.exists(filename):
+        answer = input("The file {} already exists, do you want to replace it?"\
+                " (y/n)".format(filename))
+        
+
+
 def str_to_int(str_list):
     """Converts list of strings to a list of ints.
 
-    Special characters '-' and '--' are erased from data.
+    Assumption: all of the values are greater than 0.
+    When a value is '-' it is replaced by -1. 
     Arguments:
     str_list -- list[str], list of strings.
     Returns: 
@@ -83,10 +98,53 @@ def str_to_int(str_list):
 
         except ValueError:
             # If the value cannot be converted do nothing.
-            pass
+            int_list.append(-1)
 
     return int_list
 
+
+def order_data(data_list, timestamps):
+    """ Uses the data in data_list to create a DataFrame.
+
+    The DataFrame contains in the first column the timestamps, for
+    each sensor the data appears in this order: sensor name, L, T, E, S.
+    Arguments:
+    data_list -- list of dict, contains the data of each sensor.
+    timestamps -- list, contains the timestamps at which the values 
+    were taken for one day only.
+    Returns:
+    ordered_df -- pd.DataFrame, reordered data from data_list.
+
+    """
+    ordered_df= pd.DataFrame()
+    nb_sensors = len(data_list)
+    nb_values = len(data_list[0]['L'])
+
+    for i in range(nb_sensors):
+        sensor_data = data_list[i]
+        sensor_nb = sensor_data['name'].split('(')[0] # Get sensor's number.
+
+        # Add the sensor name and the values to the DataFrame.
+        ordered_df['sensor_' + sensor_nb] = [sensor_data['name']] + (
+                nb_values * [''])
+        ordered_df['L_' + sensor_nb] = [''] + sensor_data['L']
+        ordered_df['T_' + sensor_nb] = [''] + sensor_data['T']
+        ordered_df['E_' + sensor_nb] = [''] + sensor_data['E']
+        ordered_df['S_' + sensor_nb] = [''] + sensor_data['S']
+        
+    # Duplicate timestamps and insert them into the DataFrame.
+    nb_days = nb_values // len(timestamps) - 1 
+    days = ['']
+
+    for i in range(nb_days):
+        days = days + ['Day_' + str(i)] + (len(timestamps) - 1) * ['']
+
+
+    timestamps = [''] + timestamps * (nb_values // len(timestamps))
+    ordered_df.insert(0, 'timestamps', timestamps)
+    ordered_df.insert(0, 'days', days)
+    ordered_df.to_csv('test.csv')
+    breakpoint()
 
 def read_data(csv_file):
     """ Reads the data from the input csv file.
@@ -100,7 +158,8 @@ def read_data(csv_file):
     data_list -- list of dict, contains the data of each sensor.
     """
     df = pd.read_csv(csv_file)
-    freq = 27 # Repeat frequency, number of hours plus 3 lines. 
+    ordered_df = pd.DataFrame()
+    freq = 27 # Repeat frequency, 24 hours plus 3 lines. 
     nb_sensors = round(len(df)/freq) 
     data_list = [] # List to contain the data of each sensor.
 
@@ -108,7 +167,8 @@ def read_data(csv_file):
         tmp_df = df[i*freq:(i+1)*freq]
 
         sensor_name = tmp_df[tmp_df.columns[0]][i*freq]
-        sensor_data = {'name': sensor_name}
+        sensor_nb = sensor_name.split('(')[0]
+        sensor_data = {'name': sensor_name} 
 
         # Data lists for each quantity.
         L = list()
@@ -118,23 +178,36 @@ def read_data(csv_file):
 
         for col in tmp_df.columns:
             if tmp_df[col][1 + i*freq] == 'L':
-                L.extend(str_to_int(tmp_df[col][2:26].tolist()))
+                L.extend(tmp_df[col][2:26].tolist())
 
             elif tmp_df[col][1 + i*freq] == 'E':
-                E.extend(str_to_int(tmp_df[col][2:26].tolist()))
+                E.extend(tmp_df[col][2:26].tolist())
 
             elif tmp_df[col][1 + i*freq] == 'S':
-                S.extend(str_to_int(tmp_df[col][2:26].tolist()))
+                S.extend(tmp_df[col][2:26].tolist())
 
             elif tmp_df[col][1 + i*freq] == 'T':
-                T.extend(str_to_int(tmp_df[col][2:26].tolist()))
+                T.extend(tmp_df[col][2:26].tolist())
 
         # Add sensor values to plant dictionnary.
-        sensor_data.update({'L': L})
-        sensor_data.update({'E': E})
-        sensor_data.update({'S': S})
-        sensor_data.update({'T': T})
+        sensor_data.update({'L': str_to_int(L)})
+        sensor_data.update({'E': str_to_int(E)})
+        sensor_data.update({'S': str_to_int(S)})
+        sensor_data.update({'T': str_to_int(T)})
+
+        ordered_df['sensor_' + sensor_nb] = [sensor_name] + (len(L)-1) * ['-']
+        ordered_df['L_' + sensor_nb] = L
+        ordered_df['T_' + sensor_nb] = T
+        ordered_df['E_' + sensor_nb] = E
+        ordered_df['S_' + sensor_nb] = S
 
         data_list.append(sensor_data)
 
+    # Add an extra lign above everything with the names and remove name from therest
+    timestamps = df[df.columns[0]][2:26].tolist()
+    ordered_df = order_data(data_list, timestamps)
+
+    # Save reordered data.
+
+    breakpoint()
     return data_list

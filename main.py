@@ -14,5 +14,6 @@ if __name__ == '__main__':
     file_checks(args.file)
 
     data_list = read_data(args.file)
+    breakpoint()
 
     print("Program terminated without errors.")
