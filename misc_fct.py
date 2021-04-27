@@ -65,20 +65,6 @@ def file_checks(inputed_file, extension='csv'):
             extension, splited_file[-1]))
 
 
-def user_input(filename):
-    """ Queries the user to replace file or not if it exists.
-
-    Arguments:
-    filename -- str, path to the file.
-    Returns:
-
-    """
-    if os.exists(filename):
-        answer = input("The file {} already exists, do you want to replace it?"\
-                " (y/n)".format(filename))
-        
-
-
 def str_to_int(str_list):
     """Converts list of strings to a list of ints.
 
@@ -103,7 +89,7 @@ def str_to_int(str_list):
     return int_list
 
 
-def order_data(data_list, timestamps):
+def order_data(data_list, timestamps, csv_file):
     """ Uses the data in data_list to create a DataFrame.
 
     The DataFrame contains in the first column the timestamps, for
@@ -112,6 +98,8 @@ def order_data(data_list, timestamps):
     data_list -- list of dict, contains the data of each sensor.
     timestamps -- list, contains the timestamps at which the values 
     were taken for one day only.
+    csv_file -- str, path to the save location, _ordered will
+    be appended to the name.
     Returns:
     ordered_df -- pd.DataFrame, reordered data from data_list.
 
@@ -133,18 +121,28 @@ def order_data(data_list, timestamps):
         ordered_df['S_' + sensor_nb] = [''] + sensor_data['S']
         
     # Duplicate timestamps and insert them into the DataFrame.
-    nb_days = nb_values // len(timestamps) - 1 
+    nb_days = nb_values // len(timestamps)
     days = ['']
 
     for i in range(nb_days):
         days = days + ['Day_' + str(i)] + (len(timestamps) - 1) * ['']
 
-
     timestamps = [''] + timestamps * (nb_values // len(timestamps))
     ordered_df.insert(0, 'timestamps', timestamps)
     ordered_df.insert(0, 'days', days)
-    ordered_df.to_csv('test.csv')
-    breakpoint()
+
+    splited_name = csv_file.split('.')
+    
+    # Save the data after appending _ordered to the name.
+    if splited_name[-1] != 'csv':
+        ordered_df.to_csv(csv_file + '_ordered.csv')
+
+    else:
+        save_name = '.'.join(map(str, splited_name[:-1])) + '_ordered.csv'
+        ordered_df.to_csv(save_name)
+
+    return ordered_df
+
 
 def read_data(csv_file):
     """ Reads the data from the input csv file.
@@ -156,6 +154,7 @@ def read_data(csv_file):
     csv_file -- str, path to csv file.
     Returns:
     data_list -- list of dict, contains the data of each sensor.
+
     """
     df = pd.read_csv(csv_file)
     ordered_df = pd.DataFrame()
@@ -195,19 +194,9 @@ def read_data(csv_file):
         sensor_data.update({'S': str_to_int(S)})
         sensor_data.update({'T': str_to_int(T)})
 
-        ordered_df['sensor_' + sensor_nb] = [sensor_name] + (len(L)-1) * ['-']
-        ordered_df['L_' + sensor_nb] = L
-        ordered_df['T_' + sensor_nb] = T
-        ordered_df['E_' + sensor_nb] = E
-        ordered_df['S_' + sensor_nb] = S
-
         data_list.append(sensor_data)
 
-    # Add an extra lign above everything with the names and remove name from therest
     timestamps = df[df.columns[0]][2:26].tolist()
-    ordered_df = order_data(data_list, timestamps)
+    ordered_df = order_data(data_list, timestamps, csv_file)
 
-    # Save reordered data.
-
-    breakpoint()
     return data_list
