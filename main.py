@@ -7,6 +7,8 @@
 # Contact: mathias.roesler@univ-reims.fr
 
 from misc_fct import *
+from data_fct import *
+
 
 if __name__ == '__main__':
     args = parse_args()
@@ -14,6 +16,5 @@ if __name__ == '__main__':
     file_checks(args.file)
 
     data_list = read_data(args.file)
-    breakpoint()
 
     print("Program terminated without errors.")
