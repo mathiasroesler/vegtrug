@@ -3,7 +3,7 @@
 #
 # Miscellaneous functions for the vegtrug project.
 # Author: Mathias Roesler
-# Last modified: 04/21
+# Last modified: 05/21
 # Contact: mathias.roesler@univ-reims.fr
 
 import os
@@ -23,6 +23,9 @@ def parse_args():
     description = "Analyse a csv file, reorders the data and plots it."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("file", type=str, help="Path to the csv file to read.") 
+    parser.add_argument("--c", "--control", type=str, nargs='+',  default=1,
+            metavar='control_group', dest='control_group',
+            help="Sensor numbers in the control group.")
 
     return parser.parse_args()
 

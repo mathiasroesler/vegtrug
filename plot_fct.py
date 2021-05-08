@@ -53,7 +53,7 @@ def plot_group_data(data_list, group, figure_title, save_loc):
         assert(os.path.isdir(save_loc))
 
     except AssertionError:
-        error_handler("Invalid save location.")
+        error_handler("invalid save location.")
 
     # Create figure for plotting.
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))

@@ -60,7 +60,7 @@ def order_data(data_list, timestamps, csv_file):
 
     for i in range(nb_sensors):
         sensor_data = data_list[i]
-        sensor_nb = sensor_data['name'].split('(')[0] # Get sensor's number.
+        sensor_nb = sensor_data['number']
 
         # Add the sensor name and the values to the DataFrame.
         ordered_df['sensor_' + sensor_nb] = [sensor_data['name']] + (
@@ -89,7 +89,7 @@ def order_data(data_list, timestamps, csv_file):
 
     else:
         save_name = '.'.join(map(str, splited_name[:-1])) + '_ordered.csv'
-        ordered_df.to_csv(save_name)
+        ordered_df.to_csv(save_name, index=None)
 
     return ordered_df
 
@@ -117,7 +117,14 @@ def read_data(csv_file):
         tmp_df = df[i*freq:(i+1)*freq]
 
         sensor_name = tmp_df[tmp_df.columns[0]][i*freq]
-        sensor_nb = int(re.search(r'\d+', sensor_name).group())
+
+        try:
+            sensor_nb = re.search(r'\d+', sensor_name).group()
+
+        except:
+            # If there is no sensor number in the name.
+            sensor_nb = str(i+1)
+
         sensor_data = {'name': sensor_name, 'number': sensor_nb} 
 
         # Data lists for each quantity.
