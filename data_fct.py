@@ -93,7 +93,7 @@ def order_data(data_list, timestamps, csv_file, save_loc):
     return ordered_df
 
 
-def read_data(csv_file, save_loc):
+def read_data(csv_file, save_loc, nb_sensors, repeat_freq=27):
     """ Reads the data from the input csv file.
 
     A dictionnary is created for each sensor that contains five keys:
@@ -103,6 +103,8 @@ def read_data(csv_file, save_loc):
     csv_file -- str, path to csv file, absolute path or pathname.
     save_loc -- str, location to save the csv file, 
         absolute path or pathname.
+    nb_sensors -- int, number of sensors used.
+    repeat_freq -- int, repeat frequency (default 27).
 
     Returns:
     data_list -- list of dict, contains the data of each sensor.
@@ -110,8 +112,8 @@ def read_data(csv_file, save_loc):
     """
     df = pd.read_csv(csv_file)
     ordered_df = pd.DataFrame()
-    freq = 27 # Repeat frequency, 24 hours plus 3 lines. 
-    nb_sensors = round(len(df)/freq) 
+    freq = repeat_freq # Repeat frequency, 24 hours plus 3 lines. 
+    nb_sensors = nb_sensors
     data_list = [] # List to contain the data of each sensor.
 
     for i in range(nb_sensors):
