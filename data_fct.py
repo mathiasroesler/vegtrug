@@ -7,6 +7,7 @@
 # Contact: mathias.roesler@univ-reims.fr
 
 import re
+import os.path
 import numpy as np
 import pandas as pd
 
@@ -38,7 +39,7 @@ def str_to_int(str_list):
     return int_list
 
 
-def order_data(data_list, timestamps, csv_file):
+def order_data(data_list, timestamps, csv_file, save_loc):
     """ Uses the data in data_list to create a DataFrame.
 
     The DataFrame contains in the first column the timestamps, for
@@ -47,8 +48,10 @@ def order_data(data_list, timestamps, csv_file):
     data_list -- list of dict, contains the data of each sensor.
     timestamps -- list, contains the timestamps at which the values 
     were taken for one day only.
-    csv_file -- str, path to the save location, _ordered will
-    be appended to the name.
+    csv_file -- str, name of the csv_file, _ordered will be appended 
+        before saving it.
+    save_loc -- str, location to save the csv file, 
+        absolute path or pathname.
 
     Returns:
     ordered_df -- pd.DataFrame, reordered data from data_list.
@@ -78,30 +81,28 @@ def order_data(data_list, timestamps, csv_file):
         days = days + ['Day_' + str(i)] + (len(timestamps) - 1) * ['']
 
     timestamps = [''] + timestamps * (nb_values // len(timestamps))
-    ordered_df.insert(0, 'timestamps', timestamps)
-    ordered_df.insert(0, 'days', days)
+    ordered_df.insert(0, 'Timestamps', timestamps)
+    ordered_df.insert(0, 'Days', days)
 
-    splited_name = csv_file.split('.')
+    splited_name = save_loc.split('.')
     
-    # Save the data after appending _ordered to the name.
-    if splited_name[-1] != 'csv':
-        ordered_df.to_csv(csv_file + '_ordered.csv')
-
-    else:
-        save_name = '.'.join(map(str, splited_name[:-1])) + '_ordered.csv'
-        ordered_df.to_csv(save_name, index=None)
+    # Save the data.
+    ordered_df.to_csv(os.path.join(save_loc, csv_file + '_ordered.csv'),
+            index=None)
 
     return ordered_df
 
 
-def read_data(csv_file):
+def read_data(csv_file, save_loc):
     """ Reads the data from the input csv file.
 
     A dictionnary is created for each sensor that contains five keys:
     the sensor name, L the luminosity, E the conductivity, T the
     temperature, and S the soil humidity.
     Arguments:
-    csv_file -- str, path to csv file.
+    csv_file -- str, path to csv file, absolute path or pathname.
+    save_loc -- str, location to save the csv file, 
+        absolute path or pathname.
 
     Returns:
     data_list -- list of dict, contains the data of each sensor.
@@ -155,6 +156,14 @@ def read_data(csv_file):
         data_list.append(sensor_data)
 
     timestamps = df[df.columns[0]][2:26].tolist()
-    ordered_df = order_data(data_list, timestamps, csv_file)
+
+    try:
+        path_bits = csv_file.split('/')
+        csv_file_name = path_bits[-1]
+
+    except:
+        csv_file_name = csv_file
+
+    ordered_df = order_data(data_list, timestamps, csv_file_name, save_loc)
 
     return data_list
