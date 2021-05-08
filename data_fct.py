@@ -6,8 +6,11 @@
 # Last modified: 04/21
 # Contact: mathias.roesler@univ-reims.fr
 
+import re
 import numpy as np
 import pandas as pd
+
+from misc_fct import *
 
 
 def str_to_int(str_list):
@@ -114,8 +117,8 @@ def read_data(csv_file):
         tmp_df = df[i*freq:(i+1)*freq]
 
         sensor_name = tmp_df[tmp_df.columns[0]][i*freq]
-        sensor_nb = sensor_name.split('(')[0]
-        sensor_data = {'name': sensor_name} 
+        sensor_nb = int(re.search(r'\d+', sensor_name).group())
+        sensor_data = {'name': sensor_name, 'number': sensor_nb} 
 
         # Data lists for each quantity.
         L = list()

@@ -8,6 +8,7 @@
 
 from misc_fct import *
 from data_fct import *
+from plot_fct import *
 
 
 if __name__ == '__main__':
@@ -16,5 +17,7 @@ if __name__ == '__main__':
     file_checks(args.file)
 
     data_list = read_data(args.file)
+    plot_group_data(data_list, [1, 2, 4], 'Control group', 'read_csv_sep.py')
+
 
     print("Program terminated without errors.")

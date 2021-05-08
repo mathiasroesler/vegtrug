@@ -6,8 +6,8 @@
 # Last modified: 04/21
 # Contact: mathias.roesler@univ-reims.fr
 
-import sys
 import os
+import sys
 import argparse
 
 
