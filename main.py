@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # Find the sensors that are not in control group.
     for sensor in data_list:
-        if sensor['number'] not in args.control_group:
+        if sensor['number'] not in grp_list[0]:
             test_group.append(sensor['number'])
             
     plot_group_data(data_list, grp_list[0], 'Control group', 

@@ -45,7 +45,7 @@ def error_handler(msg):
     Returns:
 
     """
-    sys.stderr.write("Error: " + msg + "\n")
+    sys.stderr.write("\nError: " + msg + "\n")
     exit(1)
 
 
@@ -58,7 +58,7 @@ def warning_handler(msg):
     Returns:
 
     """
-    sys.stderr.write("Warning: " + msg + "\n")
+    sys.stderr.write("\nWarning: " + msg + "\n")
 
 
 def file_checks(input_file, extension='csv'):
@@ -191,6 +191,10 @@ def create_groups(nb_grps, nb_sensors, control_group):
     """
     grp_list = list()
     test_grp = list()
+
+    if nb_grps <= 0:
+        warning_handler("invalid number of groups. Reverting to default.")
+        nb_grps = 1
 
     if control_group == None:
         print("\nPlease specify the sensor numbers in the control group.")
